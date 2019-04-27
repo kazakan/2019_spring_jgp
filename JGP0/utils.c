@@ -378,18 +378,80 @@ int cd(char * arg){
 }
 
 int copy(char* arg){
-	/*제가 구현하려던 방식이 특히 파일과 디렉토리 구분 개념에서
-	많이 잘못되었을 것이라고 생각합니다. 정말 죄송합니다...*/
 
 	char* token = 0;
 	char source[_MAX_DIR] = {0};
 	char source_cp[_MAX_DIR] = {0};
 	char dest[_MAX_DIR];
-	int gotSource = 0;
-	int gotDest = 0;
 
-	/*arg를 source과 dest로 나누어 저장하는 소스코드입니다.
-	dest에 값이 없을 경우 return(1)하는 코드를 구현하지 못했습니다.*/
+	if(arg == 0 || strlen(arg) == 0){
+		printf("요소가 입력되지 않았습니다.\n");
+		return(1);
+	}
+	token = strtok(arg, " \t");
+	strcpy(source, token);
+	strcpy(source_cp, source); //source 수정 방지를 위해 복제
+	token = strtok(NULL, " \t");
+	if(token == NULL){
+		printf("목표 경로가 입력되지 않았습니다.\n");
+		return(1);
+	}
+	strcpy(dest, token);
+	if(strtok(NULL, " \t") != NULL){
+		printf("입력이 너무 많습니다.\n");
+		return(1);
+	}
+	if(!strcmp(source, dest)){
+		printf("요소와 목표 경로가 동일합니다.\n");
+		return(1);
+	}
+
+	getFullPath(&source, &source);
+	if(!isPathValid(source)){
+		printf("요소가 올바르지 않습니다.\n");
+		return(1);
+	}
+	getFullPath(&dest, &dest);
+	if(!isDir(dest)){
+		printf("목표 경로가 올바르지 않습니다.\n");
+		return(1);
+	}
+
+	char* name = 0;
+	char* tmp = 0;
+
+	name = strtok(source_cp, "\\");
+	while((tmp = strtok(NULL, "\\")) != NULL){
+		name = tmp;
+	}
+	strcat(&source, "\0\0");  //SHFileOperation 사용을 위한 null문자 2개 삽입
+	strcat(&dest, "\\");
+	strcat(&dest, name);
+	strcat(&dest, "\0\0"); //SHFileOperation 사용을 위한 null문자 2개 삽입
+	if(isPathValid(dest)){
+		printf("목표 경로에 요소가 이미 존재합니다.\n");
+		return(1);
+	}
+
+	SHFILEOPSTRUCTA sf;
+	int result;
+
+	sf.pFrom = &source;
+	sf.pTo = &dest;
+	sf.wFunc = FO_COPY;
+	sf.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_SILENT;
+
+	result = SHFileOperation(&sf);
+	return result;
+}
+
+
+int mv(char* arg){
+	char* token = 0;
+	char source[_MAX_DIR] = {0};
+	char source_cp[_MAX_DIR] = {0};
+	char dest[_MAX_DIR];
+
 	if(arg == 0 || strlen(arg) == 0){
 		printf("요소가 입력되지 않았습니다.\n");
 		return(1);
@@ -400,100 +462,66 @@ int copy(char* arg){
 	token = strtok(NULL, " \t");
 	if(token == NULL){
 		printf("목표 경로가 입력되지 않았습니다.\n");
-		return 1;
+		return(1);
 	}
 	strcpy(dest, token);
 	if(strtok(NULL, " \t") != NULL){
-		printf("입력이 너무 많습니다.");
-		return 1;
+		printf("입력이 너무 많습니다.\n");
+		return(1);
+	}
+	if(!strcmp(source, dest)){
+		printf("요소와 목표 경로가 동일합니다.\n");
+		return(1);
 	}
 
 	getFullPath(&source, &source);
+	if(!isPathValid(source)){
+		printf("요소가 올바르지 않습니다.\n");
+		return(1);
+	}
 	getFullPath(&dest, &dest);
-
 	if(!isDir(dest)){
-		printf("목표경로의 값이 폴더가 아닙니다.");
-		return 1;
+		printf("목표 경로가 올바르지 않습니다.\n");
+		return(1);
 	}
 
 	char* name = 0;
 	char* tmp = 0;
+
 	name = strtok(source_cp, "\\");
-	while((tmp = strtok(NULL, "\\")) != NULL) name = tmp;
-
-
-	//SHFILEOPSTRUCTA 사용시 문자열 끝에 두개의 널문자가 필요
+	while((tmp = strtok(NULL, "\\")) != NULL){
+		name = tmp;
+	}
 	strcat(&source, "\0\0");
 	strcat(&dest, "\\");
 	strcat(&dest, name);
 	strcat(&dest, "\0\0");
-
-	if(isPathValid(&dest)){
-		printf("해당경로가 이미 존재합니다.");
-		return 1;
+	if(isPathValid(dest)){
+		printf("목표 경로에 요소가 이미 존재합니다.\n");
+		return(1);
 	}
 
 	SHFILEOPSTRUCTA sf;
 	int result;
+
 	sf.pFrom = &source;
 	sf.pTo = &dest;
-	sf.wFunc = FO_COPY;
+	sf.wFunc = FO_MOVE;
 	sf.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_SILENT;
 
 	result = SHFileOperation(&sf);
-
-
-
-	///*source이 접근 가능한 파일 또는 디렉토리인지 확인, 접근 불가능하면 return(1)*/
-	//while(access(source, 0) == 0){
-
-	//	/*구현하려던 방식은 다음과 같습니다.
-	//	1. dest가 접근 가능한 디렉토리인지 확인, 접근 불가능하면 return(1)
-	//	2. source와 dest 내 파일 및 디렉토리의 이름을 비교해 겹치는지 확인, 겹치면 return(1)
-	//	3. copyFile() 함수 실행*/
-
-	//	if(isPathValid(dest)){
-	//		// printf("입력된 DEST가 존재하지 않습니다.\n");
-	//		return 1;
-	//	} else if(){
-	//		// printf("DEST에 SOURCE와 동일한 파일 또는 디렉토리가 존재합니다.\n");
-	//		return 1;
-	//	} else{
-	//		copyFile(source, dest);
-	//	}
-	//}
-	//printf("입력된 SOURCE가 존재하지 않습니다.\n");
 	return result;
 }
 
 
-
-//void copyFile(char source, char dest){
-//	/*copyFile 함수에는 재귀함수의 형식을 이용해
-//	source가 디렉토리일 때는 source 하부의 디렉토리를
-//	계속해서 방문해서 복사하는 방식으로 소스를 구현하려 했습니다.
-//
-//
-//	for(int i = 0; i < 파일갯수; i++) {
-//	   file = getFile(i);
-//	   if(file == 디렉토리)
-//		  mkdir(붙여넣을 디렉토리, file)
-//		  copyFile(, );
-//	   else
-//		  파일 복사 함수(file);
-//	}*/
-//}
-
-
-int mv(char * arg){
-	printf("mv excuted\n%s\n", arg);
-	return 0;
-}
-
-int pwd(char * arg){
+int pwd(char* arg){
+	if(arg != NULL){
+		printf("입력이 너무 많습니다.\n");
+		return(1);
+	}
 
 	printf("%s\n", directory);
-	return 0;
+	return(0);
 }
 
 

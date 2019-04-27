@@ -1,3 +1,7 @@
+/*
+* util.h의 일부 함수 테스트 파일
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>

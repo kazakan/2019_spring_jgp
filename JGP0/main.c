@@ -36,7 +36,7 @@ int main(void){
 		//cmd->cmd_char 명령어 문자열
 		//cmd->cmd_func 명령어 함수 포인터, exit의 경우 함수포인터는 지정되지 않음
 		cmd = isCommandExist(cmd_with_arg[0]); 
-		printf("%s/%s \n", cmd_with_arg[0], cmd_with_arg[1]); //cmd값 확인
+		//printf("%s/%s \n", cmd_with_arg[0], cmd_with_arg[1]); //cmd값 확인
 		if((_buffer[0] == 0) || cmd == 0){
 			printf("처리할 수 없는 명령어입니다.\n");
 			freeCommandWithArg(cmd_with_arg);
