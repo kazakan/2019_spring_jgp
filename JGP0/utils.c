@@ -17,9 +17,54 @@ CMD commands[] = {
 
 // command function body
 int help(char * arg){
-	printf("help excuted\n%s\n", arg);
-	return 0;
+	// command , synopsis , explanation
+	const char* HELP_MESSAGE[][3] = {
+		{"exit","exit","프로그램을 종료합니다."},
+		{"ls","ls [TARGET] [-lr] [-t|-s]","TARGET이 생략되었을 경우 현재 디렉토리 내의 파일 및 폴더에 대한 정보를 출력합니다. TARGET이 입력된 경우 TARGET에 대한 정보를 출력합니다. \
+TARGET이 파일인 경우 해당 파일에 대한 정보를 출력합니다.TARGET이 폴더인 경우 해당 폴더 내 파일 및 폴더에 대한 정보를 출력합니다. \
+TARGET에는 와일드카드(*)를 포함하여 검색이 가능합니다.\n\n-옵션\n\
+-l : 상세정보를 출력합니다.\n\
+- t : 최근 수정시간을 기준으로 출력합니다.\n\
+- s : 크기 순서대로 출력합니다.\n\
+- r : 역순으로 출력합니다."},
+		{"delete","delete TARGET","TARGET을 제거합니다. \nTARGET은 휴지통으로 이동되지 않고 즉시 삭제됩니다."},
+		{"rename","rename SOURCE DEST","SOURCE의 이름을 DEST로 변경합니다."},
+		{"cd","cd DEST","DEST로 현재 디렉토리를 이동합니다."},
+		{"copy","copy SOURCE DEST","SOURCE를 DEST에 복사합니다."},
+		{"mv","mv SOURCE DEST","SOURCE의 경로를 DEST로 이동합니다."},
+		{"pwd","pwd","현재 디렉토리 경로를 출력합니다."},
+		{"help","help [COMMAND]","명령어에 대한 설명을 출력합니다."},
+		{"make","make TARGET  [-f]","현재 디렉토리 내에 TARGET을 이름으로 갖는 파일을 생성합니다.\n\n\
+-옵션\n\
+-f :  TARGET을 이름으로 가지는 폴더를 생성합니다. 해당 옵션이 주어지지 않았다면 파일을 생성합니다."}
+	};
+	
+	char* arg1 = NULL;
+	arg1 = strtok(arg," \t");
+	if(strtok(NULL, " \t") != NULL){ // 2개 이상의 인자
+		printf("인자가 너무 많습니다.");
+		return 1;
+	}
+
+	if(arg == 0 || strlen(arg1) == 0){
+		for(int i = 0; i < 10; ++i){
+			printf("Command : %s\nSynopsis\n\t%s\n-설명\n%s\n\n\n", HELP_MESSAGE[i][0], HELP_MESSAGE[i][1], HELP_MESSAGE[i][2]);
+		}
+		return 0;
+	} 
+
+	for(int i = 0; i < 10; ++i){
+		if(strcmp(arg1, HELP_MESSAGE[i][0]) == 0){
+			printf("Command : %s\nSynopsis\n\t%s\n-설명\n%s\n\n\n", HELP_MESSAGE[i][0], HELP_MESSAGE[i][1], HELP_MESSAGE[i][2]);
+			return 0;
+		}
+	}
+
+	
+	printf("No such command.\n");
+	return 1;
 }
+
 
 int make(char * arg){
 	char* argument[BUFFER_SIZE] = {0,};
@@ -175,6 +220,7 @@ int ls(char* arg){
 	struct _finddata_t * array = NULL;
 
 	if(arg != 0){
+
 		tok = strtok(arg, " \t");
 		while(tok != NULL){
 			if(gotTarget == 0 && tok[0] != '-'){
