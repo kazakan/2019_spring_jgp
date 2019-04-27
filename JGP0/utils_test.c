@@ -177,6 +177,7 @@ int main(void){
 	*/
 	
 	printf("----- ls -----\n");
+	massert(ls("") == 0); // 빈 문자열
 	massert(ls(".") == 0);	//상대경로 with dot
 	massert(ls("..") == 0);	//상대경로 with dot
 	massert(ls(".\\subtestfolder") == 0); //상대경로 폴더 with dot
@@ -200,14 +201,28 @@ int main(void){
 	massert(ls("t*.*t") == 0); //two wildcard
 	massert(ls("test.aaa*aa") == 1); // wildcard , 경로 없음
 	massert(ls("워*파*")==0); //wildcard with korean
-	massert(ls("C:\\Users\\dojh9\\test\\t*t") == 0); //wild card 절대경로 
+	massert(ls("C:\\Users\\dojh9\\test\\t*t") == 0); //wild card 절대경로
 
+	char ls_op_l[] = "test* -l";
+	massert(ls(ls_op_l) ==0); //옵션 l
+	char ls_op_t[] = "test* -t";
+	massert(ls(ls_op_t) == 0); //옵션 t
+	char ls_op_s[] = "test* -s";
+	massert(ls(ls_op_s) == 0); //옵션 s
+	char ls_op_r[] = "test* -r";
+	massert(ls(ls_op_r) == 0); //옵션 r
+	char ls_op_l_r_t[] = "test* -l -r -t";
+	massert(ls(ls_op_l_r_t) == 0); //옵션 l r t
+	char ls_op_lt[] = "test* -lt";
+	massert(ls(ls_op_lt) == 0); //옵션 lt
+	char ls_op_ls[] = "test* -ls";
+	massert(ls(ls_op_ls) == 0); //옵션 ls
+	char ls_op_ts[] = "test* -ts";
+	massert(ls(ls_op_ts) == 1); //옵션 ts
+	char ls_op_llllssssr[] = "test* -llllssssr";
+	massert(ls(ls_op_llllssssr) == 0); //옵션 llllssssr
 
-	/*
-		getPathFromUser()
-		유저에게 받은 문자열이 directory배열에 입력됨
-	*/
+	printf("PASSED\n\n");
 
-	// 아무것도 입력을 하지 않은 체 enter를 누른경우 directory 값은 이전과 같음
 	
 }
