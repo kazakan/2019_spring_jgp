@@ -42,7 +42,7 @@ TARGET에는 와일드카드(*)를 포함하여 검색이 가능합니다.\n\n-옵션\n\
 	char* arg1 = NULL;
 	arg1 = strtok(arg," \t");
 	if(strtok(NULL, " \t") != NULL){ // 2개 이상의 인자
-		printf("인자가 너무 많습니다.");
+		printf("인자가 너무 많습니다.\n");
 		return 1;
 	}
 
