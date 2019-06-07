@@ -215,7 +215,7 @@ int ls(char* arg){
 	//for file handling
 	int i, j;
 	int* ptr, index = 0, total = 0;
-	long Handle;
+	intptr_t Handle;
 	struct _finddata_t FileInfo;
 	struct _finddata_t* array = NULL;
 
@@ -395,6 +395,9 @@ int _rename(char* arg){ //rename oldname newname 屈怕
 		}
 		return 1;
 	} else if (arg3 != NULL){  //牢磊 俺荐 腹阑 锭
+		struct _finddata_t* array = NULL;
+		getAllFileName(arg1, arg2);
+		//batchRename(arg1, arg2);
 		return 1;
 	}
 	return 1;
@@ -730,4 +733,153 @@ void showFileInfo(struct _finddata_t FileInfo, int l){
 		} else
 			printf("\t");
 	}
+}
+
+int batchRename(char* str1, char* str2){
+	//char *res;
+	//char temp[BUFFER_SIZE];
+	//memset(&temp, 0, sizeof(str1) - 1);
+	//memcpy(&temp, str1, strlen(str1) - 1);
+	//res = memchr(str1, str2[0], strlen(str1));  //根据要查找的字符串第一个字符，切割源字符串
+	//if (res == NULL)
+	//{
+	//	printf("find nothing...\n");
+	//	return 0;
+	//}
+
+	//int n;
+	//while (1)
+	//{
+	//	n = memcmp(res, str2, strlen(str2) - 1); //比较
+	//	if (n != 0)
+	//	{
+	//		if (strlen(res) <= strlen(str2))  //切割出的字符串小于要查找字符串的长度
+	//		{
+	//			printf("find nothing...\n");
+	//			return 0;
+	//		}
+	//		else
+	//		{
+	//			//根据要查找的第一个字符继续切割
+	//			res = memchr(res + 1, str2[0], strlen(res));
+	//			if (res == NULL)
+	//			{
+	//				printf("find nothing...\n");
+	//				return 0;
+	//			}
+
+	int result = access(str1, 0);
+	if (result == 0){
+		result = rename(str1, str2);
+		if (result == 0){
+			return 0;
+		} else if (result == -1){
+			return 1;
+		}
+	} else if (result == -1){
+		return 1;
+	}
+	return 1;
+}
+
+int getAllFileName(char* str1, char* str2){
+	char target[_MAX_DIR] = ".\\";
+	strcat(target, str1);
+	char temp1[BUFFER_SIZE];
+	char temp2[BUFFER_SIZE];
+	memset(&temp1, 0, sizeof(str1) - 1);
+	memcpy(&temp1, str1, strlen(str1) - 1);
+	memset(&temp2, 0, sizeof(str2) - 1);
+	memcpy(&temp2, str2, strlen(str2) - 1);
+
+	//for file handling
+	int index = 0, total = 0;
+	intptr_t Handle;
+	struct _finddata_t FileInfo;
+	struct _finddata_t* array = NULL;
+	struct _finddata_t* array_all = NULL;
+
+	if ((Handle = _findfirst(target, &FileInfo)) == -1L){
+		printf("Cannot find such a file\n");
+		return 1;
+	} else{
+		//Handle = _findfirst(target, &FileInfo);
+		//count
+		do{
+			if (strcmp(FileInfo.name, ".") && strcmp(FileInfo.name, "..")){
+				total++;
+			}
+		} while (_findnext(Handle, &FileInfo) == 0);
+
+		//copy
+		Handle = _findfirst(target, &FileInfo);
+		array = malloc(total * sizeof(struct _finddata_t));
+		do{
+			if (strcmp(FileInfo.name, ".") && strcmp(FileInfo.name, "..")){
+				array[index].attrib = FileInfo.attrib;
+				strcpy(array[index].name, FileInfo.name);
+				array[index].size = FileInfo.size;
+				//array[index].time_access = FileInfo.time_access;
+				//array[index].time_create = FileInfo.time_create;
+				array[index].time_write = FileInfo.time_write;
+				++index;
+			}
+		} while (_findnext(Handle, &FileInfo) == 0);
+
+		_findclose(Handle);
+	}
+
+	memcpy(&target, ".\\*", 4);
+	Handle = _findfirst(target, &FileInfo);
+	index = 0;
+	total = 0;
+
+	do{
+		if (strcmp(FileInfo.name, ".") && strcmp(FileInfo.name, "..")){
+			total++;
+		}
+	} while (_findnext(Handle, &FileInfo) == 0);
+
+	//copy
+	Handle = _findfirst(target, &FileInfo);
+	array_all = malloc(total * sizeof(struct _finddata_t));
+	do{
+		if (strcmp(FileInfo.name, ".") && strcmp(FileInfo.name, "..")){
+			array_all[index].attrib = FileInfo.attrib;
+			strcpy(array_all[index].name, FileInfo.name);
+			array_all[index].size = FileInfo.size;
+			//array[index].time_access = FileInfo.time_access;
+			//array[index].time_create = FileInfo.time_create;
+			array_all[index].time_write = FileInfo.time_write;
+			++index;
+		}
+	} while (_findnext(Handle, &FileInfo) == 0);
+
+	_findclose(Handle);
+
+	char array_rename[_MAX_DIR][260];
+	for (int i = 0; i < total; i++){
+		memcpy(&array_rename[i], array[i].name, sizeof(array[i].name));
+		strrpc(array_rename[i], temp1, temp2);
+		batchRename(array[i].name, array_rename[i]);
+	}
+
+	return 0;
+}
+
+char* strrpc(char* str, char* oldstr, char* newstr){
+	char bstr[BUFFER_SIZE];//转换缓冲区
+	memset(bstr, 0, sizeof(bstr));
+
+	for (int i = 0; i < strlen(str); i++){
+		if (!strncmp(str + i, oldstr, strlen(oldstr))){//查找目标字符串
+			strcat(bstr, newstr);
+			i += strlen(oldstr) - 1;
+		} else{
+			strncat(bstr, str + i, 1);//保存一字节进缓冲区
+		}
+	}
+
+	strcpy(str, bstr);
+	return str;
 }

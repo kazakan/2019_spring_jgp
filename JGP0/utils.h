@@ -40,11 +40,14 @@ extern CMD commands[];
 // utility functions head
 void getPathFromUser();
 int isPathValid(char* path);
-void dealSlash(char*buffer);
+void dealSlash(char* buffer);
 CMD* isCommandExist(char* command);
 char** getCommandWithArg(char* buffer);
-void freeCommandWithArg(char ** cmd_arg);
-int isDir(char *path);
+void freeCommandWithArg(char** cmd_arg);
+int isDir(char* path);
 int getFullPath(char* partialPath, char* dest);
 int isWhiteSpace(char c);
 void showFileInfo(struct _finddata_t FileInfo, int l);
+int batchRename(char* str, char* text);
+int getAllFileName(char*, char*);
+char* strrpc(char* str, char* oldstr, char* newstr);
