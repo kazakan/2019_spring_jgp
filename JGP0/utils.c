@@ -378,6 +378,10 @@ int _rename(char* arg){ //rename oldname newname 형태
 	arg1 = strtok(argument, " "); //oldname
 	arg2 = strtok(NULL, " "); //newname
 	arg3 = strtok(NULL, " ");
+	if (strtok(NULL, " ") != NULL){ // more than 3 args
+		return 1;
+	}
+
 	if (arg2 == NULL){ //인자 1개
 		return 1;
 	} else if (arg3 == NULL) //인자 두개일때
@@ -395,18 +399,24 @@ int _rename(char* arg){ //rename oldname newname 형태
 		}
 		return 1;
 	} else if (arg3 != NULL){  //3번째 인자로 옵션이 들어왔을때
-		if (arg3[0] == '-' && arg3[1] == 'm' && arg3[2] == NULL){ //check option
-			const int type1 = getRenameType(arg1);
-			const int type2 = getRenameType(arg2);
-			if (type1 == -1 || type2 == -1 || type1 != type2){ // type not matches or not allowed
-				return 1;
-			}
-			getAllFileName(arg1, arg2, type1);
-			return 0;
-		} else{
+		int optionLen = strlen(arg3);
+		if (optionLen < 2 || arg3[0] != '-'){ //check option
 			return 1;
 		}
-		return 1;
+
+		for (int i = 1; i < optionLen; ++i){ //check option
+			if (arg3[i] != 'm'){
+				return 1;
+			}
+		}
+
+		const int type1 = getRenameType(arg1);
+		const int type2 = getRenameType(arg2);
+		if (type1 == -1 || type2 == -1 || type1 != type2){ // type not matches or not allowed
+			return 1;
+		}
+		getAllFileName(arg1, arg2, type1);
+		return 0;
 	}
 	return 1;
 }
@@ -1014,7 +1024,6 @@ int matchPattern(const char* str, const char* pattern, int patternNum){
 			} else{
 				return 0;
 			}
-
 
 		}
 		break;
