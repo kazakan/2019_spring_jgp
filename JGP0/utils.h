@@ -48,6 +48,9 @@ int isDir(char* path);
 int getFullPath(char* partialPath, char* dest);
 int isWhiteSpace(char c);
 void showFileInfo(struct _finddata_t FileInfo, int l);
+
+// utility functions for rename
 int batchRename(char* str, char* text);
 int getAllFileName(char*, char*);
 char* strrpc(char* str, char* oldstr, char* newstr);
+int getRenameType(const char* str); // 1 : *str, 2 : str*, 3: *str*, 4: str1*str2 , -1 : NOT ALLOWED

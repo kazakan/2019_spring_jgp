@@ -41,88 +41,88 @@ int main(void){
 		오류발생시 1 반환
 	*/
 	//TODO : subprocess 경로 체크, directory 값 확인
-	printf("----- cd -----\n");
-	char STR_AAA_AAA[] = "AAA AAA";
-	massert(cd(STR_EMPTY) == 1);
-	massert(cd(STR_AAA_AAA) == 1);
-	massert(cd(NULL) == 1);
-	massert(cd(PATH_C) == 0);
-	massert(cd(PATH_TEST_DIR) == 0);
-	printf("PASSED\n\n");
+	//printf("----- cd -----\n");
+	//char STR_AAA_AAA[] = "AAA AAA";
+	//massert(cd(STR_EMPTY) == 1);
+	//massert(cd(STR_AAA_AAA) == 1);
+	//massert(cd(NULL) == 1);
+	//massert(cd(PATH_C) == 0);
+	//massert(cd(PATH_TEST_DIR) == 0);
+	//printf("PASSED\n\n");
 
-	/*
-		isPathValid(char*)
-		유효한 경로인가를 판단
-		유효한 경우 1, 아닌경우 0 반환
-	*/
-	printf("----- isPathValid(char*) -----\n");
-	massert(isPathValid(PATH_PWD_REL) == 1); // 상대경로로 현재경로
-	massert(isPathValid(PATH_PARENT_REL) == 1);  // 상대경로로 상위경로
-	massert(isPathValid(PATH_C) == 1); // C드라이브 경로
-	massert(isPathValid(PATH_INVALID_ABS) == 0); //유효하지 않은 경로
-	massert(isPathValid(PATH_INVALID_REL) == 0); //유효하지 않은 경로
-	massert(isPathValid(STR_EMPTY) == 0); //빈 문자열
-	massert(isPathValid(PATH_TEST_DIR) == 1); //절대경로 폴더
-	massert(isPathValid(PATH_TEST_SUBDIR) == 1); //상대경로 폴더
-	massert(isPathValid(PATH_TEST_SUBFILE1) == 1); //절대경로 파일
-	massert(isPathValid(PATH_TEST_SUBFILE1_REL) == 1); //상대경로 파일
-	printf("PASSED\n\n");
+	///*
+	//	isPathValid(char*)
+	//	유효한 경로인가를 판단
+	//	유효한 경우 1, 아닌경우 0 반환
+	//*/
+	//printf("----- isPathValid(char*) -----\n");
+	//massert(isPathValid(PATH_PWD_REL) == 1); // 상대경로로 현재경로
+	//massert(isPathValid(PATH_PARENT_REL) == 1);  // 상대경로로 상위경로
+	//massert(isPathValid(PATH_C) == 1); // C드라이브 경로
+	//massert(isPathValid(PATH_INVALID_ABS) == 0); //유효하지 않은 경로
+	//massert(isPathValid(PATH_INVALID_REL) == 0); //유효하지 않은 경로
+	//massert(isPathValid(STR_EMPTY) == 0); //빈 문자열
+	//massert(isPathValid(PATH_TEST_DIR) == 1); //절대경로 폴더
+	//massert(isPathValid(PATH_TEST_SUBDIR) == 1); //상대경로 폴더
+	//massert(isPathValid(PATH_TEST_SUBFILE1) == 1); //절대경로 파일
+	//massert(isPathValid(PATH_TEST_SUBFILE1_REL) == 1); //상대경로 파일
+	//printf("PASSED\n\n");
 
-	/*
-		isDir(char *path)
-		경로가 디렉토리인가?
-		디렉토리 일경우 0이 아닌 값, 아닌경우 0 반환
-	*/
-	printf("----- isDir(char *path) -----\n");
-	massert(isDir(".") != 0); // 상대경로로 현재경로
-	massert(isDir("..") != 0);  // 상대경로로 상위경로
-	massert(isDir(PATH_C) != 0); // C드라이브 경로
-	massert(isDir(PATH_INVALID_ABS) == 0); //유효하지 않은 경로
-	massert(isDir(PATH_INVALID_REL) == 0); //유효하지 않은 경로
-	massert(isDir(STR_EMPTY) == 0); //빈 문자열
-	massert(isDir(PATH_TEST_DIR) != 0); //절대경로 폴더
-	massert(isDir(PATH_TEST_SUBDIR) != 0); //상대경로 폴더
-	massert(isDir(PATH_TEST_SUBFILE1) == 0); //절대경로 파일
-	massert(isDir(PATH_TEST_SUBFILE1_REL) == 0); //상대경로 파일
+	///*
+	//	isDir(char *path)
+	//	경로가 디렉토리인가?
+	//	디렉토리 일경우 0이 아닌 값, 아닌경우 0 반환
+	//*/
+	//printf("----- isDir(char *path) -----\n");
+	//massert(isDir(".") != 0); // 상대경로로 현재경로
+	//massert(isDir("..") != 0);  // 상대경로로 상위경로
+	//massert(isDir(PATH_C) != 0); // C드라이브 경로
+	//massert(isDir(PATH_INVALID_ABS) == 0); //유효하지 않은 경로
+	//massert(isDir(PATH_INVALID_REL) == 0); //유효하지 않은 경로
+	//massert(isDir(STR_EMPTY) == 0); //빈 문자열
+	//massert(isDir(PATH_TEST_DIR) != 0); //절대경로 폴더
+	//massert(isDir(PATH_TEST_SUBDIR) != 0); //상대경로 폴더
+	//massert(isDir(PATH_TEST_SUBFILE1) == 0); //절대경로 파일
+	//massert(isDir(PATH_TEST_SUBFILE1_REL) == 0); //상대경로 파일
 
-	printf("PASSED\n\n");
+	//printf("PASSED\n\n");
 
-	/*
-		getFullPath(char* partialPath, char* dest);
-		상대경로를 절대경로로 변환해준다.
-		오류가 없을 때 0 반환 , 오류발생시 1 반환
+	///*
+	//	getFullPath(char* partialPath, char* dest);
+	//	상대경로를 절대경로로 변환해준다.
+	//	오류가 없을 때 0 반환 , 오류발생시 1 반환
 
-		단, 입력된 partialPath가 이미 절대경로인경우 그 절대경로를 그대로 출력
-	*/
+	//	단, 입력된 partialPath가 이미 절대경로인경우 그 절대경로를 그대로 출력
+	//*/
 
-	printf("----- getFullPath(char* partialPath, char* dest) -----\n");
-	char PATH_PARTIAL[] = "ABC";
-	char PATH_FULL[_MAX_DIR];
-	strcpy(PATH_FULL,PATH_TEST_DIR);
-	strcat(PATH_FULL, "\\");
-	strcat(PATH_FULL, PATH_PARTIAL);
+	//printf("----- getFullPath(char* partialPath, char* dest) -----\n");
+	//char PATH_PARTIAL[] = "ABC";
+	//char PATH_FULL[_MAX_DIR];
+	//strcpy(PATH_FULL,PATH_TEST_DIR);
+	//strcat(PATH_FULL, "\\");
+	//strcat(PATH_FULL, PATH_PARTIAL);
 
-	scode(getFullPath(PATH_PARTIAL,TEMP));
-	printf("Partial : %s\nExpected Full : %s\nResult : %s\n", PATH_PARTIAL, PATH_FULL, TEMP);
-	massert(strcmp(TEMP,PATH_FULL) == 0);
-	printf("\n");
+	//scode(getFullPath(PATH_PARTIAL,TEMP));
+	//printf("Partial : %s\nExpected Full : %s\nResult : %s\n", PATH_PARTIAL, PATH_FULL, TEMP);
+	//massert(strcmp(TEMP,PATH_FULL) == 0);
+	//printf("\n");
 
-	scode(getFullPath(PATH_FULL, TEMP));
-	printf("Partial : %s\nExpected Full : %s\nResult : %s\n", PATH_PARTIAL, PATH_FULL, TEMP);
-	massert(strcmp(TEMP, PATH_FULL) == 0);
-	printf("\n");
+	//scode(getFullPath(PATH_FULL, TEMP));
+	//printf("Partial : %s\nExpected Full : %s\nResult : %s\n", PATH_PARTIAL, PATH_FULL, TEMP);
+	//massert(strcmp(TEMP, PATH_FULL) == 0);
+	//printf("\n");
 
-	scode(getFullPath(PATH_TEST_SUBDIR_REL, TEMP));
-	printf("Partial : %s\nExpected Full : %s\nResult : %s\n", PATH_TEST_SUBDIR_REL, PATH_TEST_SUBDIR, TEMP);
-	massert(strcmp(TEMP, PATH_TEST_SUBDIR) == 0);
-	printf("\n");
+	//scode(getFullPath(PATH_TEST_SUBDIR_REL, TEMP));
+	//printf("Partial : %s\nExpected Full : %s\nResult : %s\n", PATH_TEST_SUBDIR_REL, PATH_TEST_SUBDIR, TEMP);
+	//massert(strcmp(TEMP, PATH_TEST_SUBDIR) == 0);
+	//printf("\n");
 
-	scode(getFullPath(PATH_TEST_DIR, TEMP));
-	printf("Partial : %s\nExpected Full : %s\nResult : %s\n", PATH_TEST_DIR, PATH_TEST_DIR, TEMP);
-	massert(strcmp(TEMP, PATH_TEST_DIR) == 0);
-	printf("\n");
+	//scode(getFullPath(PATH_TEST_DIR, TEMP));
+	//printf("Partial : %s\nExpected Full : %s\nResult : %s\n", PATH_TEST_DIR, PATH_TEST_DIR, TEMP);
+	//massert(strcmp(TEMP, PATH_TEST_DIR) == 0);
+	//printf("\n");
 
-	printf("PASSED\n\n");
+	//printf("PASSED\n\n");
 
 
 	/*
@@ -170,6 +170,22 @@ int main(void){
 	scode(freeCommandWithArg(ca));
 
 
+	printf("PASSED\n\n");
+
+	/*
+		int getRenameType(const char* str)
+	*/
+	massert(getRenameType("str") == -1);
+	massert(getRenameType("*str") == 1);
+	massert(getRenameType("str*") == 2);
+	massert(getRenameType("*str*") == 3);
+	massert(getRenameType("str*str") == 4);
+	massert(getRenameType("*") == -1);
+	massert(getRenameType("**") == -1);
+	massert(getRenameType("***") == -1 );
+	massert(getRenameType("*str*str") == -1);
+	massert(getRenameType("*str*str*") == -1);
+	massert(getRenameType("") == -1);
 	printf("PASSED\n\n");
 
 	/*

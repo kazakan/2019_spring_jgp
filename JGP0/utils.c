@@ -394,10 +394,17 @@ int _rename(char* arg){ //rename oldname newname 형태
 			return 1;
 		}
 		return 1;
-	} else if (arg3 != NULL){  //인자 개수 많을 때
-		struct _finddata_t* array = NULL;
-		getAllFileName(arg1, arg2);
-		//batchRename(arg1, arg2);
+	} else if (arg3 != NULL){  //3번째 인자로 옵션이 들어왔을때
+		if (arg3[0] == '-' && arg3[1] == 'm' && arg3[2] == NULL){ //check option
+			const int type1 = getRenameType(&arg1);
+			const int type2 = getRenameType(&arg2);
+			if (type1 == -1 || type2 == -1 || type1 != type2){ // type not matches or not allowed
+				return 1;
+			}
+			getAllFileName(arg1, arg2);
+		} else{
+			return 1;
+		}
 		return 1;
 	}
 	return 1;
@@ -783,10 +790,10 @@ int batchRename(char* str1, char* str2){
 }
 
 int getAllFileName(char* str1, char* str2){
-	char target[_MAX_DIR] = ".\\";
-	strcat(target, str1);
+	char target[BUFFER_SIZE];
 	char temp1[BUFFER_SIZE];
 	char temp2[BUFFER_SIZE];
+	memset(&target, 0, sizeof(str1) - 1);
 	memset(&temp1, 0, sizeof(str1) - 1);
 	memcpy(&temp1, str1, strlen(str1) - 1);
 	memset(&temp2, 0, sizeof(str2) - 1);
@@ -882,4 +889,54 @@ char* strrpc(char* str, char* oldstr, char* newstr){
 
 	strcpy(str, bstr);
 	return str;
+}
+
+int getRenameType(const char* str){
+	int len = strlen(str);
+	char* pPos = str-1;
+	int pPositions[2] = {-1,-1};
+	int i = 0;
+
+	while (1){
+		pPos = strchr(pPos+1, '*');
+		if (pPos == NULL){
+			break;
+		} else{
+			if (i > 1){ // there're more than 2 stars
+				return -1;
+			}
+			pPositions[i] = pPos - str;
+			++i;
+		}
+	}
+
+	if (pPositions[0] == -1){ // no stars
+		return -1;
+	}
+
+	if (pPositions[1] != -1){ // there are two stars
+		if (pPositions[1] == len - 1 && pPositions[0] == 0){ // stars on both side;
+			if (len == 2){ // "**" not allowed
+				return -1;
+			} else{ // "*str*"
+				return 3;
+			}
+		} else{
+			return -1;
+		}
+	}
+
+	// only 1 stars
+	if (len == 1){ // "*" not allowed.
+		return -1;
+	} else{
+		if (pPositions[0] == 0){ // "*str"
+			return 1;
+		} else if (pPositions[0] == len - 1){ // "str*"
+			return 2;
+		} else{ //"str1*str2"
+			return 4; 
+		}
+	}
+	return -1;
 }
