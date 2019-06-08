@@ -51,6 +51,7 @@ void showFileInfo(struct _finddata_t FileInfo, int l);
 
 // utility functions for rename
 int batchRename(char* str, char* text);
-int getAllFileName(char*, char*);
-char* strrpc(char* str, char* oldstr, char* newstr);
+int getAllFileName(char*, char*,int);
+char* strrpc(char* str, char* oldstr, char* newstr,int type);
 int getRenameType(const char* str); // 1 : *str, 2 : str*, 3: *str*, 4: str1*str2 , -1 : NOT ALLOWED
+int matchPattern(const char* str,const char* pattern, int patternNum); // return 1 when str matches pattern, if not return 0. patternNum should be 1~4(inclusive) 

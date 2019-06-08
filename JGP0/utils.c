@@ -396,12 +396,13 @@ int _rename(char* arg){ //rename oldname newname ÇüÅÂ
 		return 1;
 	} else if (arg3 != NULL){  //3¹øÂ° ÀÎÀÚ·Î ¿É¼ÇÀÌ µé¾î¿ÔÀ»¶§
 		if (arg3[0] == '-' && arg3[1] == 'm' && arg3[2] == NULL){ //check option
-			const int type1 = getRenameType(&arg1);
-			const int type2 = getRenameType(&arg2);
+			const int type1 = getRenameType(arg1);
+			const int type2 = getRenameType(arg2);
 			if (type1 == -1 || type2 == -1 || type1 != type2){ // type not matches or not allowed
 				return 1;
 			}
-			getAllFileName(arg1, arg2);
+			getAllFileName(arg1, arg2, type1);
+			return 0;
 		} else{
 			return 1;
 		}
@@ -789,116 +790,134 @@ int batchRename(char* str1, char* str2){
 	return 1;
 }
 
-int getAllFileName(char* str1, char* str2){
-	char target[BUFFER_SIZE];
-	char temp1[BUFFER_SIZE];
-	char temp2[BUFFER_SIZE];
-	memset(&target, 0, sizeof(str1) - 1);
-	memset(&temp1, 0, sizeof(str1) - 1);
-	memcpy(&temp1, str1, strlen(str1) - 1);
-	memset(&temp2, 0, sizeof(str2) - 1);
-	memcpy(&temp2, str2, strlen(str2) - 1);
+int getAllFileName(char* str1, char* str2, int type){
+
+	char target[BUFFER_SIZE] = {0,};
+	char srcPat[BUFFER_SIZE] = {0,};
+	char destPat[BUFFER_SIZE] = {0,};
+
+	char originalName[_MAX_DIR][260] = {0,};
+	char renamedName[_MAX_DIR][260] = {0,};
+
+	strcpy(&target, str1);
+	strcpy(&srcPat, str1);
+	strcpy(&destPat, str2);
 
 	//for file handling
-	int index = 0, total = 0;
-	intptr_t Handle;
-	struct _finddata_t FileInfo;
-	struct _finddata_t* array = NULL;
-	struct _finddata_t* array_all = NULL;
+	int total = 0;
+	intptr_t handle;
+	struct _finddata_t fileInfo;
 
-	if ((Handle = _findfirst(target, &FileInfo)) == -1L){
+	if ((handle = _findfirst(str1, &fileInfo)) == -1L){
 		printf("Cannot find such a file\n");
 		return 1;
 	} else{
-		//Handle = _findfirst(target, &FileInfo);
-		//count
 		do{
-			if (strcmp(FileInfo.name, ".") && strcmp(FileInfo.name, "..")){
-				total++;
-			}
-		} while (_findnext(Handle, &FileInfo) == 0);
+			if (strcmp(fileInfo.name, ".") && strcmp(fileInfo.name, "..")){
+				if (matchPattern(&fileInfo.name, str1, type)){
+					strcpy(&originalName[total], &(fileInfo.name));
+					total++;
+				}
 
-		//copy
-		Handle = _findfirst(target, &FileInfo);
-		array = malloc(total * sizeof(struct _finddata_t));
-		do{
-			if (strcmp(FileInfo.name, ".") && strcmp(FileInfo.name, "..")){
-				array[index].attrib = FileInfo.attrib;
-				strcpy(array[index].name, FileInfo.name);
-				array[index].size = FileInfo.size;
-				//array[index].time_access = FileInfo.time_access;
-				//array[index].time_create = FileInfo.time_create;
-				array[index].time_write = FileInfo.time_write;
-				++index;
 			}
-		} while (_findnext(Handle, &FileInfo) == 0);
+		} while (_findnext(handle, &fileInfo) == 0);
 
-		_findclose(Handle);
+		_findclose(handle);
 	}
 
-	memcpy(&target, ".\\*", 4);
-	Handle = _findfirst(target, &FileInfo);
-	index = 0;
-	total = 0;
-
-	do{
-		if (strcmp(FileInfo.name, ".") && strcmp(FileInfo.name, "..")){
-			total++;
-		}
-	} while (_findnext(Handle, &FileInfo) == 0);
-
-	//copy
-	Handle = _findfirst(target, &FileInfo);
-	array_all = malloc(total * sizeof(struct _finddata_t));
-	do{
-		if (strcmp(FileInfo.name, ".") && strcmp(FileInfo.name, "..")){
-			array_all[index].attrib = FileInfo.attrib;
-			strcpy(array_all[index].name, FileInfo.name);
-			array_all[index].size = FileInfo.size;
-			//array[index].time_access = FileInfo.time_access;
-			//array[index].time_create = FileInfo.time_create;
-			array_all[index].time_write = FileInfo.time_write;
-			++index;
-		}
-	} while (_findnext(Handle, &FileInfo) == 0);
-
-	_findclose(Handle);
-
-	char array_rename[_MAX_DIR][260];
 	for (int i = 0; i < total; i++){
-		memcpy(&array_rename[i], array[i].name, sizeof(array[i].name));
-		strrpc(array_rename[i], temp1, temp2);
-		batchRename(array[i].name, array_rename[i]);
+		memcpy(&renamedName[i], &originalName[i], sizeof(originalName[i]));
+		strrpc(&renamedName[i], &srcPat, &destPat, type);
+		batchRename(&originalName[i], &renamedName[i]);
 	}
 
 	return 0;
 }
 
-char* strrpc(char* str, char* oldstr, char* newstr){
+char* strrpc(char* str, char* srcPat, char* destPat, int type){
 	char bstr[BUFFER_SIZE];//×ª»»»º³åÇø
 	memset(bstr, 0, sizeof(bstr));
 
-	for (int i = 0; i < strlen(str); i++){
-		if (!strncmp(str + i, oldstr, strlen(oldstr))){//²éÕÒÄ¿±ê×Ö·û´®
-			strcat(bstr, newstr);
-			i += strlen(oldstr) - 1;
-		} else{
-			strncat(bstr, str + i, 1);//±£´æÒ»×Ö½Ú½ø»º³åÇø
-		}
-	}
+	switch (type){
+		case 1: // *str
+		{
+			char strInSrcPat[260] = {0,};
+			char strInDestPat[260] = {0,};
+			char* replacePos = NULL;
+			strcpy(&strInSrcPat, srcPat + 1);
+			strcpy(&strInDestPat, destPat + 1);
 
-	strcpy(str, bstr);
+			replacePos = str + strlen(str) - strlen(&strInSrcPat);
+
+			strncat(&bstr, str, replacePos - str);
+			strcat(&bstr, &strInDestPat);
+
+			strcpy(str, &bstr);
+		}
+		break;
+		case 2: // str*
+		{
+			char strInSrcPat[260] = {0,};
+			char strInDestPat[260] = {0,};
+			strncpy(&strInSrcPat, srcPat, strlen(srcPat) - 1);
+			strncpy(&strInDestPat, destPat, strlen(destPat) - 1);
+
+			strcat(&bstr, &strInDestPat);
+			strcat(&bstr, str + strlen(&strInSrcPat));
+			strcpy(str, &bstr);
+		}
+		break;
+		case 3: //*str*
+		{
+			char strInSrcPat[260] = {0,};
+			char strInDestPat[260] = {0,};
+			char innerStr[260] = {0,}; // copied from str but first and last char are excluded.
+			int strIdx = NULL;
+			strncpy(&strInSrcPat, srcPat + 1, strlen(srcPat) - 2);
+			strncpy(&strInDestPat, destPat + 1, strlen(destPat) - 2);
+
+			strncpy(&innerStr, str + 1, strlen(str) - 2);
+			strIdx = strstr(&innerStr, &strInSrcPat) - &innerStr + 1;
+
+			strncpy(&bstr, str, strIdx);
+			strcat(&bstr, &strInDestPat);
+			strcat(&bstr, str + strIdx + strlen(&strInSrcPat));
+
+			strcpy(str, &bstr);
+		}
+		break;
+		case 4://str1*str2
+		{
+			char str1InSrcPat[260] = {0,};
+			char str2InSrcPat[260] = {0,};
+			char str1InDestPat[260] = {0,};
+			char str2InDestPat[260] = {0,};
+			char* srcStarPos = strchr(srcPat, '*');
+			char* destStarPos = strchr(destPat, '*');
+			strncpy(&str1InSrcPat, srcPat, srcStarPos - srcPat);
+			strcpy(&str2InSrcPat, srcStarPos + 1);
+			strncpy(&str1InDestPat, destPat, destStarPos - destPat);
+			strcpy(&str2InDestPat, destStarPos + 1);
+
+			strcpy(&bstr, &str1InDestPat);
+			strncat(&bstr, str + strlen(&str1InSrcPat), strlen(str) - strlen(&str1InSrcPat) - strlen(&str2InSrcPat));
+			strcat(&bstr, &str2InDestPat);
+
+			strcpy(str, &bstr);
+		}
+		break;
+	}
 	return str;
 }
 
 int getRenameType(const char* str){
 	int len = strlen(str);
-	char* pPos = str-1;
+	char* pPos = str - 1;
 	int pPositions[2] = {-1,-1};
 	int i = 0;
 
 	while (1){
-		pPos = strchr(pPos+1, '*');
+		pPos = strchr(pPos + 1, '*');
 		if (pPos == NULL){
 			break;
 		} else{
@@ -935,8 +954,90 @@ int getRenameType(const char* str){
 		} else if (pPositions[0] == len - 1){ // "str*"
 			return 2;
 		} else{ //"str1*str2"
-			return 4; 
+			return 4;
 		}
 	}
 	return -1;
+}
+
+int matchPattern(const char* str, const char* pattern, int patternNum){
+	if (patternNum < 1 || patternNum > 4){
+		return 0;
+	}
+
+	switch (patternNum){
+		case 1: // *str
+		{
+			char strInPattern[260] = {0,};
+			strcpy(&strInPattern, pattern + 1);
+			if (strlen(str) == strlen(strInPattern)){
+				return 0;
+			}
+
+			if (strncmp(str + strlen(str) - strlen(&strInPattern), &strInPattern, strlen(&strInPattern)) == 0){
+				return 1;
+			} else{
+				return 0;
+			}
+		}
+		break;
+		case 2: // str*
+		{
+			char strInPattern[260] = {0,};
+			strncpy(&strInPattern, pattern, strlen(pattern) - 1);
+			if (strlen(str) == strlen(&strInPattern)){
+				return 0;
+			}
+			if (strstr(str, &strInPattern) == str){
+				return 1;
+			} else{
+				return 0;
+			}
+		}
+		break;
+		case 3: //*str*
+		{
+			char strInPattern[260] = {0,};
+			char tmpStr[260] = {0,};
+			strcpy(&strInPattern, pattern + 1);
+			strcpy(&tmpStr, str + 1);
+			strInPattern[strlen(strInPattern) - 1] = 0; // remove * at last
+			tmpStr[strlen(tmpStr) - 1] = 0;
+
+			if (strlen(str) < strlen(&strInPattern) + 2){
+				return 0;
+			}
+
+
+			if (strstr(&tmpStr, &strInPattern) != NULL){
+				return 1;
+			} else{
+				return 0;
+			}
+
+
+		}
+		break;
+		case 4://str1*str2
+		{
+			char str1InPattern[260] = {0,};
+			char str2InPattern[260] = {0,};
+			char* starPos = strchr(pattern, '*');
+			strncpy(&str1InPattern, pattern, starPos - pattern);
+			strcpy(&str2InPattern, starPos + 1);
+
+			if (strlen(str) <= strlen(&str1InPattern) + strlen(&str2InPattern)){
+				return 0;
+			}
+
+			if (strstr(str, &str1InPattern) == str){
+				if (strncmp(str + strlen(str) - strlen(&str2InPattern), &str2InPattern, strlen(&str2InPattern)) == 0){
+					return 1;
+				}
+			}
+			return 0;
+		}
+		break;
+	}
+	return 0;
 }
